@@ -1,0 +1,10 @@
+[project]
+name = "datalens"
+version = "0.4.0"
+description = "Interactive statistical analysis lab (Streamlit)"
+requires-python = ">=3.12"  # numpy 2.5 / pinned stack; verified to resolve on 3.12-3.14
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
+addopts = "-ra"

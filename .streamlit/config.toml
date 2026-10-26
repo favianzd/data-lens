@@ -1,0 +1,45 @@
+# DataLens "editorial lab" theme. Token values match the design system
+# (warm white ground, navy ink, emerald accent); views/theme.py adds the few
+# styles Streamlit's theme options cannot express.
+[theme]
+base = "light"
+primaryColor = "#0B7A57"
+backgroundColor = "#FAF9F6"
+secondaryBackgroundColor = "#F2F1EC"
+textColor = "#0F1D33"
+linkColor = "#0B7A57"
+linkUnderline = false
+borderColor = "#E3E1D9"
+showWidgetBorder = true
+dataframeBorderColor = "#E3E1D9"
+dataframeHeaderBackgroundColor = "#FAF9F6"
+codeBackgroundColor = "#F7F6F2"
+codeTextColor = "#0F1D33"
+redColor = "#A3261B"
+orangeColor = "#8A5300"
+greenColor = "#0B7A57"
+blueColor = "#1F3A5F"
+baseRadius = "6px"
+buttonRadius = "6px"
+baseFontSize = 15
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap, sans-serif"
+headingFont = "Newsreader:https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap, Georgia, serif"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap, monospace"
+codeFontSize = "13px"
+headingFontSizes = ["2.875rem", "1.875rem", "1.625rem", "1.125rem", "1rem", "0.875rem"]
+headingFontWeights = [400, 400, 400, 600, 600, 600]
+metricValueFontSize = "2rem"
+metricValueFontWeight = 500
+chartCategoricalColors = ["#2D4A6E", "#0B7A57", "#B45A1E", "#8FA6C1", "#7DB89E"]
+showSidebarBorder = true
+
+[theme.sidebar]
+backgroundColor = "#F2F1EC"
+secondaryBackgroundColor = "#FFFFFF"
+headingFont = "Newsreader:https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap, Georgia, serif"
+
+[server]
+maxUploadSize = 50
+
+[browser]
+gatherUsageStats = false

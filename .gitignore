@@ -1,0 +1,17 @@
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secrets (Community Cloud secrets go in the app's Advanced settings, never in git)
+.streamlit/secrets.toml
+
+# Local editor / assistant tooling
+.claude/
+.vscode/
+.idea/
+
+# Generated reports downloaded during manual testing
+datalens_laporan_*.html
+datalens_koefisien.csv
