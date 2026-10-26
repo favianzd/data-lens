@@ -16,7 +16,15 @@ from datalens.comparison import ComparisonResult, formula
 from datalens.diagnostics import Diagnostics, DiagnosticsError, diagnose
 from datalens.formatting import fmt_num, fmt_pvalue
 from datalens.regression import RegressionResult
-from datalens.report import ReportInputs, build_report, coefficient_findings, fit_finding, limitations, report_filename
+from datalens.report import (
+    ReportInputs,
+    build_report,
+    coefficient_findings,
+    fit_finding,
+    limitations,
+    now_wib,
+    report_filename,
+)
 from views import ui
 from views.components import step_header
 from views.diagnostics import assumption_checks
@@ -69,7 +77,7 @@ def _summary_html(r: RegressionResult, diag: Diagnostics | None, cmp: Comparison
     return f"""
 <article class="dl-paper">
   <header>
-    <span class="dl-eyebrow">Ringkasan DataLens · {_date_id(datetime.now())}</span>
+    <span class="dl-eyebrow">Ringkasan DataLens · {_date_id(now_wib())}</span>
     <h2>Regresi OLS untuk {ui.esc(r.target)}</h2>
     <p class="lede">Regresi kuadrat terkecil {ui.esc(r.target)} pada {ui.esc(predictors)}.</p>
     <dl>
@@ -95,7 +103,7 @@ def _summary_html(r: RegressionResult, diag: Diagnostics | None, cmp: Comparison
 
 def _build(df: pd.DataFrame, result: RegressionResult, comparison: ComparisonResult | None,
            include_fig: bool, key: tuple) -> None:
-    now = datetime.now()
+    now = now_wib()
     name = st.session_state.get("dataset_name", "dataset")
     with st.spinner("Menyusun laporan…"):
         html = build_report(

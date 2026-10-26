@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 
 import numpy as np
@@ -11,15 +11,17 @@ from datalens.diagnostics import diagnose
 from datalens.formatting import fmt_num, fmt_pvalue
 from datalens.regression import INTERCEPT, fit_ols
 from datalens.report import (
+    WIB,
     ReportInputs,
     build_report,
     coefficient_findings,
     fit_finding,
     limitations,
+    now_wib,
     report_filename,
 )
 
-WHEN = datetime(2026, 10, 22, 9, 30)
+WHEN = datetime(2026, 10, 22, 9, 30, tzinfo=WIB)
 
 
 class _Values(HTMLParser):
@@ -226,5 +228,34 @@ def test_report_section_numbering_with_comparison(report_df):
 
 def test_report_filename_is_safe():
     name = report_filename("../data penjualan 2024.csv", WHEN)
-    assert name == "datalens_laporan____data_penjualan_2024_20261022_0930.html"
+    assert name == "datalens_laporan____data_penjualan_2024_20261022_0930_WIB.html"
     assert "/" not in name and " " not in name
+
+
+# --- Timestamps are WIB regardless of the server's clock ---------------------
+# Community Cloud runs on UTC: a report built at 12:16 UTC must say 19:16 WIB.
+
+
+def test_utc_server_time_is_shown_as_wib(report_df):
+    server_time = datetime(2026, 10, 26, 12, 16, tzinfo=timezone.utc)
+    r = fit_ols(report_df, "y", ["x1"])
+    html = build_report(ReportInputs("data.csv", report_df, r, None, False, server_time))
+    assert "Dibuat 2026-10-26 19:16 WIB" in html
+    assert report_filename("data.csv", server_time) == "datalens_laporan_data_20261026_1916_WIB.html"
+
+
+def test_wib_conversion_rolls_over_the_date():
+    late_utc = datetime(2026, 10, 26, 20, 30, tzinfo=timezone.utc)  # 03:30 WIB next day
+    assert report_filename("d.csv", late_utc).endswith("_20261027_0330_WIB.html")
+
+
+def test_other_zones_convert_to_wib():
+    paris = datetime(2026, 7, 1, 10, 0, tzinfo=timezone(timedelta(hours=2)))  # CEST
+    assert report_filename("d.csv", paris).endswith("_20260701_1500_WIB.html")
+
+
+def test_default_generation_time_is_wib(report_df):
+    inputs = ReportInputs("d.csv", report_df, fit_ols(report_df, "y", ["x1"]))
+    assert inputs.generated_at.utcoffset() == timedelta(hours=7)
+    assert inputs.generated_at.tzname() == "WIB"
+    assert now_wib().utcoffset() == timedelta(hours=7)

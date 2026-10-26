@@ -15,7 +15,7 @@ from __future__ import annotations
 import html
 import platform
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 import pandas as pd
@@ -35,6 +35,21 @@ from datalens.formatting import fmt_num, fmt_pvalue
 from datalens.plots import cv_error_figure, qq_plot, residuals_vs_fitted, scale_location
 from datalens.regression import RegressionResult
 
+# Western Indonesia Time: a fixed UTC+7 with no daylight saving, so a fixed
+# offset is exact and needs no tzdata (which zoneinfo lacks on Windows).
+# The deployed server runs on UTC, so report times must not use naive now().
+WIB = timezone(timedelta(hours=7), "WIB")
+
+
+def now_wib() -> datetime:
+    return datetime.now(WIB)
+
+
+def to_wib(when: datetime) -> datetime:
+    """Convert to WIB. Naive datetimes are read as the machine's local time
+    (Python's ``astimezone`` rule), which is what a naive ``now()`` means."""
+    return when.astimezone(WIB)
+
 
 @dataclass(frozen=True)
 class ReportInputs:
@@ -43,7 +58,7 @@ class ReportInputs:
     result: RegressionResult
     comparison: ComparisonResult | None = None
     include_figures: bool = True
-    generated_at: datetime = field(default_factory=datetime.now)
+    generated_at: datetime = field(default_factory=now_wib)
 
 
 # --- Rule-based text -------------------------------------------------------------
@@ -375,7 +390,7 @@ def build_report(inputs: ReportInputs) -> str:
         f"statsmodels {statsmodels.__version__}, SciPy {scipy.__version__}, scikit-learn {sklearn.__version__}, "
         f"Plotly {plotly.__version__}"
     )
-    stamp = inputs.generated_at.strftime("%Y-%m-%d %H:%M")
+    stamp = to_wib(inputs.generated_at).strftime("%Y-%m-%d %H:%M %Z")
     return f"""<!doctype html>
 <html lang="id">
 <head>
@@ -403,4 +418,4 @@ sebelum dipakai.</p>
 
 def report_filename(dataset_name: str, when: datetime) -> str:
     stem = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in dataset_name.rsplit(".", 1)[0])[:40]
-    return f"datalens_laporan_{stem or 'dataset'}_{when:%Y%m%d_%H%M}.html"
+    return f"datalens_laporan_{stem or 'dataset'}_{to_wib(when):%Y%m%d_%H%M}_WIB.html"
