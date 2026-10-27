@@ -1,19 +1,43 @@
 # DataLens — Interactive Statistical Analysis Lab
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://data-lens-fzd.streamlit.app/)
+[![tests](https://github.com/favianzd/data-lens/actions/workflows/tests.yml/badge.svg)](https://github.com/favianzd/data-lens/actions/workflows/tests.yml)
+![Python 3.12–3.14](https://img.shields.io/badge/python-3.12%E2%80%933.14-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 DataLens is a Streamlit app for uploading a CSV, exploring it, and fitting linear regression models with
 honest, well-explained inference. Every number on screen is computed from the uploaded data by
 statsmodels/NumPy. Nothing is mocked. The UI explanations are in Indonesian and use standard
 statistical terminology.
 
-> **Status: v0.4.** It covers CSV upload, a data profile, exploratory statistics, OLS inference, regression
-> diagnostics, model comparison with repeated k-fold cross-validation, and a downloadable HTML report.
-> It is ready to deploy to Streamlit Community Cloud. See [DEPLOYMENT.md](DEPLOYMENT.md).
+**Try it live:** <https://data-lens-fzd.streamlit.app/>. No sign-up needed. Click **Gunakan contoh data
+sintetis** to explore with sample data.
+
+![DataLens demo: data profile, OLS regression, diagnostics and report export](docs/demo.gif)
+
+> **Status: v0.4, deployed.** It covers CSV upload, a data profile, exploratory statistics, OLS inference,
+> regression diagnostics, model comparison with repeated k-fold cross-validation, and a downloadable HTML
+> report. It runs on Streamlit Community Cloud. See [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## How it works
+
+DataLens is a guided four-step workflow. Loading a dataset unlocks Data and Regresi; fitting a model
+unlocks Diagnostik and Laporan.
+
+| Step | What you do | What DataLens computes |
+|---|---|---|
+| **01 · Data** | Upload a CSV (`,` or `;` separators and UTF-8/Latin-1 are detected automatically), or load the sample data | Size, column types, missing values and duplicates, descriptive statistics, distributions, and Pearson/Spearman correlations |
+| **02 · Regresi** | Choose Y and one or more predictors | OLS with coefficients, SEs, CIs, p-values, R² / adjusted R², F-test and AIC/BIC. A **Perbandingan model** tab compares two models with repeated k-fold cross-validation |
+| **03 · Diagnostik** | Review the checks | Residual, Q-Q and scale-location plots first, then RESET, Breusch–Pagan, Shapiro–Wilk/Jarque–Bera, VIF and influence |
+| **04 · Laporan** | Read the summary and export it | A self-contained HTML report and a coefficient CSV, both built from the same results shown on screen |
 
 ## Quick start
 
 Requires **Python 3.12+**. It was developed on 3.14, and CI tests 3.12–3.14.
 
 ```bash
+git clone https://github.com/favianzd/data-lens.git
+cd data-lens
 python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
@@ -45,7 +69,9 @@ datalens/
 tests/                  pytest suite (synthetic data, NIST reference, edge cases, headless app test)
 .streamlit/config.toml  Theme (colours, fonts, radii), upload limit, telemetry off
 .github/workflows/      CI: pytest on Python 3.12 / 3.13 / 3.14
+docs/demo.gif           README demo, cut from screenshots of the live app
 DEPLOYMENT.md           Community Cloud deployment, runtime pinning, operating notes
+LICENSE                 MIT
 ```
 
 The statistical core (`datalens/`) never imports Streamlit, so the tests and the report generator call it
@@ -126,6 +152,9 @@ and limitations.
 - **Self-contained and safe.** Plotly.js is embedded once (~4.8 MB) so figures work offline. Unchecking
   "Sertakan grafik" gives a report of about 15 KB with no scripts. All user-supplied text (file and column
   names) is HTML-escaped, and a test checks this with `<script>` column names.
+- **Timestamps in WIB.** The deployed server runs on UTC, so the report's "Dibuat …" line and the
+  download filename (`…_YYYYMMDD_HHMM_WIB.html`) are converted to Western Indonesia Time (UTC+7) and
+  labelled, whatever the server clock says.
 - A coefficient table CSV is also downloadable.
 
 ### Validation before fitting
@@ -184,11 +213,31 @@ error-boundary message.
 3. ~~Diagnostics: residual plots, Q-Q plot, VIF, formal assumption tests, influence~~
 4. ~~Model comparison: in-sample fit, nested F-test, repeated k-fold CV RMSE/MAE~~
 5. ~~Report export (HTML) generated from the same result objects; per-tab error boundary~~
-6. ~~Deployment prep: pinned runtime, CI, headless app test, [DEPLOYMENT.md](DEPLOYMENT.md)~~
-   (deploying itself needs a GitHub push plus the Community Cloud steps there)
+6. ~~Deployment: pinned runtime, CI, headless app test, live on Streamlit Community Cloud~~
+
+### Next
+
+Ordered roughly by value for effort:
+
+- **Robust standard errors (HC3)** as a toggle. The diagnostics already flag heteroscedasticity, and the
+  report already suggests HC3.
+- **Prediction panel**: enter predictor values and get both a confidence interval for the mean and a
+  prediction interval for a single new observation.
+- **Influence sensitivity**: refit without the flagged observations and show the coefficients side by side.
+- **Categorical predictors** with explicit dummy coding and a user-chosen reference level.
+- **Transformations and interactions** (log, square, `x1×x2`), with interpretations that update to match.
+- **Multiple imputation** next to complete-case results.
+- Logistic regression, a hypothesis-test module (t-test, ANOVA, chi-square), and an English UI toggle.
 
 ## Known limitations
 
 - Numeric predictors only; no interactions, transformations or categorical encoding yet.
 - Complete-case analysis only (no imputation).
+- Classical (non-robust) standard errors only.
+- Influential observations are flagged, but refitting without them is a manual step.
+- The interface is in Indonesian only.
 - Associations only: nothing in this tool supports causal claims.
+
+## License
+
+[MIT](LICENSE) © 2026 favianzd
